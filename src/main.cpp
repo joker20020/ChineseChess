@@ -3,7 +3,8 @@
 
 
 int main() {
-    ChessGame game = ChessGame();
+    ChessBoard board = ChessBoard();
+    ChessGame game = ChessGame(&board);
     game.Start();
     return 0;
 }

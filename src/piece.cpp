@@ -13,85 +13,118 @@ ChessBoard::~ChessBoard() {
     }
 }
 
-// ³õÊ¼»¯ÆåÅÌ¸ñ×Ó
+// åˆå§‹åŒ–æ£‹ç›˜æ ¼å­
 void ChessBoard::InitializeBoard() {
+    // åˆå§‹åŒ–æ£‹ç›˜ä¸º 10 è¡Œ x 9 åˆ—
     board = vector<vector<ChessPiece*>>(10, vector<ChessPiece*>(9, nullptr));
 
-    // ³õÊ¼»¯ºì·½Æå×Ó
-    SetPiece(0, 0, ROOK, RED);       // ‚e
-    SetPiece(0, 1, HORSE, RED);      // ‚Ø
-    SetPiece(0, 2, ELEPHANT, RED);   // Ïà
-    SetPiece(0, 3, ADVISOR, RED);    // ÊË
-    SetPiece(0, 4, KING, RED);       // ›
-    SetPiece(0, 5, ADVISOR, RED);    // ÊË
-    SetPiece(0, 6, ELEPHANT, RED);   // Ïà
-    SetPiece(0, 7, HORSE, RED);      // ‚Ø
-    SetPiece(0, 8, ROOK, RED);       // ‚e
-    SetPiece(2, 1, CANNON, RED);     // ÅÚ
-    SetPiece(2, 7, CANNON, RED);     // ÅÚ
-    SetPiece(3, 0, PAWN, RED);       // ±ø
-    SetPiece(3, 2, PAWN, RED);       // ±ø
-    SetPiece(3, 4, PAWN, RED);       // ±ø
-    SetPiece(3, 6, PAWN, RED);       // ±ø
-    SetPiece(3, 8, PAWN, RED);       // ±ø
+    // åˆå§‹åŒ–çº¢æ–¹æ£‹å­
+    SetPiece(0, 0, ROOK, RED);       // ä¿¥
+    SetPiece(0, 1, HORSE, RED);      // å‚Œ
+    SetPiece(0, 2, ELEPHANT, RED);   // ç›¸
+    SetPiece(0, 3, ADVISOR, RED);    // ä»•
+    SetPiece(0, 4, KING, RED);       // å¸¥
+    SetPiece(0, 5, ADVISOR, RED);    // ä»•
+    SetPiece(0, 6, ELEPHANT, RED);   // ç›¸
+    SetPiece(0, 7, HORSE, RED);      // å‚Œ
+    SetPiece(0, 8, ROOK, RED);       // ä¿¥
+    SetPiece(2, 1, CANNON, RED);     // ç‚®
+    SetPiece(2, 7, CANNON, RED);     // ç‚®
+    SetPiece(3, 0, PAWN, RED);       // å…µ
+    SetPiece(3, 2, PAWN, RED);       // å…µ
+    SetPiece(3, 4, PAWN, RED);       // å…µ
+    SetPiece(3, 6, PAWN, RED);       // å…µ
+    SetPiece(3, 8, PAWN, RED);       // å…µ
 
-    // ³õÊ¼»¯ºÚ·½Æå×Ó
-    SetPiece(9, 0, ROOK, BLACK);     // Ü‡
-    SetPiece(9, 1, HORSE, BLACK);    // ñR
-    SetPiece(9, 2, ELEPHANT, BLACK); // Ïó
-    SetPiece(9, 3, ADVISOR, BLACK);  // Ê¿
-    SetPiece(9, 4, KING, BLACK);     // Œ¢
-    SetPiece(9, 5, ADVISOR, BLACK);  // Ê¿
-    SetPiece(9, 6, ELEPHANT, BLACK); // Ïó
-    SetPiece(9, 7, HORSE, BLACK);    // ñR
-    SetPiece(9, 8, ROOK, BLACK);     // Ü‡
-    SetPiece(7, 1, CANNON, BLACK);   // ³h
-    SetPiece(7, 7, CANNON, BLACK);   // ³h
-    SetPiece(6, 0, PAWN, BLACK);     // ×ä
-    SetPiece(6, 2, PAWN, BLACK);     // ×ä
-    SetPiece(6, 4, PAWN, BLACK);     // ×ä
-    SetPiece(6, 6, PAWN, BLACK);     // ×ä
-    SetPiece(6, 8, PAWN, BLACK);     // ×ä
+    // åˆå§‹åŒ–é»‘æ–¹æ£‹å­
+    SetPiece(9, 0, ROOK, BLACK);     // è»Š
+    SetPiece(9, 1, HORSE, BLACK);    // é¦¬
+    SetPiece(9, 2, ELEPHANT, BLACK); // è±¡
+    SetPiece(9, 3, ADVISOR, BLACK);  // å£«
+    SetPiece(9, 4, KING, BLACK);     // å°‡
+    SetPiece(9, 5, ADVISOR, BLACK);  // å£«
+    SetPiece(9, 6, ELEPHANT, BLACK); // è±¡
+    SetPiece(9, 7, HORSE, BLACK);    // é¦¬
+    SetPiece(9, 8, ROOK, BLACK);     // è»Š
+    SetPiece(7, 1, CANNON, BLACK);   // ç ²
+    SetPiece(7, 7, CANNON, BLACK);   // ç ²
+    SetPiece(6, 0, PAWN, BLACK);     // å’
+    SetPiece(6, 2, PAWN, BLACK);     // å’
+    SetPiece(6, 4, PAWN, BLACK);     // å’
+    SetPiece(6, 6, PAWN, BLACK);     // å’
+    SetPiece(6, 8, PAWN, BLACK);     // å’
 }
 
-// ÉèÖÃÆå×Ó
+// è®¾ç½®æ£‹å­
 void ChessBoard::SetPiece(int row, int col, PieceType type, Color color) {
     board[row][col] = new ChessPiece{type, color, GetSymbol(type, color)};
 }
 
-// »ñÈ¡Æå×Ó¶ÔÓ¦·ûºÅ
-char ChessBoard::GetSymbol(PieceType type, Color color) {
-    static map<pair<Color, PieceType>, char> symbols = {
-        {{RED, KING},    '›'}, {{BLACK, KING},    'Œ¢'},
-        {{RED, ADVISOR}, 'ÊË'}, {{BLACK, ADVISOR}, 'Ê¿'},
-        {{RED, ELEPHANT},'Ïà'}, {{BLACK, ELEPHANT},'Ïó'},
-        {{RED, HORSE},   '‚Ø'}, {{BLACK, HORSE},   'ñR'},
-        {{RED, ROOK},    '‚e'}, {{BLACK, ROOK},    'Ü‡'},
-        {{RED, CANNON},  'ÅÚ'}, {{BLACK, CANNON},  '³h'},
-        {{RED, PAWN},    '±ø'}, {{BLACK, PAWN},    '×ä'}
+ChessPiece* ChessBoard::GetPiece(int row, int col) const{
+    return board[row][col];
+}
+
+// è·å–æ£‹å­æ ‡è¯†
+string ChessBoard::GetSymbol(PieceType type, Color color) {
+    static map<pair<Color, PieceType>, string> symbols = {
+        {{RED, KING},    "å¸¥"}, {{BLACK, KING},    "å°‡"},
+        {{RED, ADVISOR}, "ä»•"}, {{BLACK, ADVISOR}, "å£«"},
+        {{RED, ELEPHANT},"ç›¸"}, {{BLACK, ELEPHANT},"è±¡"},
+        {{RED, HORSE},   "å‚Œ"}, {{BLACK, HORSE},   "é¦¬"},
+        {{RED, ROOK},    "ä¿¥"}, {{BLACK, ROOK},    "è»Š"},
+        {{RED, CANNON},  "ç‚®"}, {{BLACK, CANNON},  "ç ²"},
+        {{RED, PAWN},    "å…µ"}, {{BLACK, PAWN},    "å’"}
     };
     return symbols[{color, type}];
 }
 
-// ´òÓ¡ÆåÅÌ
+// æ‰“å°æ£‹ç›˜
 void ChessBoard::Print() {
-    cout << "  a b c d e f g h i" << endl;
+    // æ‰“å°åˆ—æ ‡ç­¾
+    cout << "  ";
+    for (int col = 0; col < 9; ++col) {
+        cout << " " << static_cast<char>('a' + col) << "   "; // åˆ—æ ‡ç­¾ï¼ˆa-iï¼‰
+    }
+    cout << endl;
+
+    // æ‰“å°æ£‹ç›˜
     for (int row = 0; row < 10; ++row) {
-        cout << row << " ";
+        // æ‰“å°è¡Œæ ‡ç­¾
+        cout << row << " "; // è¡Œæ ‡ç­¾ï¼ˆ0-9ï¼‰
+
+        // æ‰“å°æ£‹ç›˜å†…å®¹
         for (int col = 0; col < 9; ++col) {
             if (board[row][col]) {
-                cout << board[row][col]->symbol << " ";
+                // æ‰“å°æ£‹å­ç¬¦å·ï¼ˆå›ºå®šå®½åº¦ä¸º 2 ä¸ªå­—ç¬¦ï¼‰
+                cout << " " << board[row][col]->symbol << " ";
             } else {
-                // ÏÔÊ¾¸ñ×Ó·ûºÅ
-                cout << (positionSymbols[{row, col}] ? positionSymbols[{row, col}] : ' ') << " ";
+                // æ‰“å°æ£‹ç›˜æ ¼å­ç¬¦å·ï¼ˆå›ºå®šå®½åº¦ä¸º 2 ä¸ªå­—ç¬¦ï¼‰
+                cout << " " << (positionSymbols[{row, col}] != " " ? positionSymbols[{row, col}] : "  ") << " ";
             }
+            if (col < 8) cout << "|"; // åˆ—åˆ†éš”ç¬¦
         }
-        cout << row << endl;
+        cout << " " << row << endl; // è¡Œæ ‡ç­¾ï¼ˆ0-9ï¼‰
+
+        // æ‰“å°è¡Œåˆ†éš”çº¿
+        if (row < 9) {
+            cout << "  ";
+            for (int col = 0; col < 9; ++col) {
+                cout << "----";
+                if (col < 8) cout << "+";
+            }
+            cout << endl;
+        }
     }
-    cout << "  a b c d e f g h i" << endl;
+
+    // æ‰“å°åˆ—æ ‡ç­¾
+    cout << "  ";
+    for (int col = 0; col < 9; ++col) {
+        cout << " " << static_cast<char>('a' + col) << "   "; // åˆ—æ ‡ç­¾ï¼ˆa-iï¼‰
+    }
+    cout << endl;
 }
 
-// ÒÆ¶¯Æå×Ó
+// ç§»åŠ¨æ£‹å­
 bool ChessBoard::MovePiece(int fromRow, int fromCol, int toRow, int toCol) {
     if (!IsValidMove(fromRow, fromCol, toRow, toCol)) return false;
     
@@ -103,8 +136,8 @@ bool ChessBoard::MovePiece(int fromRow, int fromCol, int toRow, int toCol) {
     return true;
 }
 
-// ¼ì²âÒÆ¶¯ÊÇ·ñºÏ·¨
-bool ChessBoard::IsValidMove(int fromRow, int fromCol, int toRow, int toCol) {
+// ç§»åŠ¨éªŒè¯ï¼ˆæ ¸å¿ƒé€»è¾‘ï¼‰
+bool ChessBoard::IsValidMove(int fromRow, int fromCol, int toRow, int toCol) const{
     ChessPiece* piece = board[fromRow][fromCol];
     if (!piece) return false;
 
@@ -116,85 +149,226 @@ bool ChessBoard::IsValidMove(int fromRow, int fromCol, int toRow, int toCol) {
             return ValidateKingMove(fromRow, fromCol, toRow, toCol, piece->color);
         case HORSE:
             return ValidateHorseMove(fromRow, fromCol, dx, dy);
-        
+        case ADVISOR:
+            return ValidateAdvisorMove(fromRow, fromCol, toRow, toCol, piece->color);
+        case ELEPHANT:
+            return ValidateElephantMove(fromRow, fromCol, dx, dy, piece->color);
+        case ROOK:
+            return ValidateRookMove(fromRow, fromCol, dx, dy);
+        case CANNON:
+            return ValidateCannonMove(fromRow, fromCol, dx, dy);
+        case PAWN:
+            return ValidatePawnMove(fromRow, fromCol, toRow, toCol, piece->color);
         default:
             return false;
     }
 }
 
-// ¼ì²â½«/Ë§ÊÇ·ñºÏ·¨
-bool ChessBoard::ValidateKingMove(int fromRow, int fromCol, int toRow, int toCol, Color color) {
-    // ÒÆ¶¯·¶Î§ÏŞÖÆ
-    if (toCol < 3 || toCol > 5) return false; // ½«/Ë§Ö»ÄÜÔÚ¾Å¹¬¸ñÄÚÒÆ¶¯
-    if (color == RED && (toRow < 0 || toRow > 2)) return false; // ºì·½½«/Ë§Ö»ÄÜÔÚÏÂ·½¾Å¹¬¸ñ
-    if (color == BLACK && (toRow < 7 || toRow > 9)) return false; // ºÚ·½½«/Ë§Ö»ÄÜÔÚÉÏ·½¾Å¹¬¸ñ
+// å°†/å¸…ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateKingMove(int fromRow, int fromCol, int toRow, int toCol, Color color)  const{
+    // ç§»åŠ¨èŒƒå›´é™åˆ¶
+    if (toCol < 3 || toCol > 5) return false;
+    if (color == RED && (toRow < 0 || toRow > 2)) return false;
+    if (color == BLACK && (toRow < 7 || toRow > 9)) return false;
 
-    // ÒÆ¶¯²½³¤ÏŞÖÆ£¨Ö»ÄÜ×ßÒ»²½£©
+    // ç§»åŠ¨æ­¥é•¿é™åˆ¶
     return (abs(toCol - fromCol) + abs(toRow - fromRow)) == 1;
 }
 
-// ¼ì²âÂíÊÇ·ñºÏ·¨
-bool ChessBoard::ValidateHorseMove(int fromRow, int fromCol, int dx, int dy) {
-    // ÒÆ¶¯²½³¤ÏŞÖÆ£¨×ßÈÕ×Ö£©
+// é©¬ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateHorseMove(int fromRow, int fromCol, int dx, int dy)  const{
+    // é©¬èµ°æ—¥å­—
     if (!((abs(dx) == 1 && abs(dy) == 2) || 
-        (abs(dx) == 2 && abs(dy) == 1))) return false;
+    (abs(dx) == 2 && abs(dy) == 1))) return false;
 
-    // ¼ì²éõ¿ÂíÍÈ
-    int blockRow = fromRow + dy / 2;
-    int blockCol = fromCol + dx / 2;
+    // æ£€æŸ¥è¹©é©¬è…¿
+    int blockRow = fromRow + dy/2;
+    int blockCol = fromCol + dx/2;
     return !board[blockRow][blockCol];
 }
 
+// å£«ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateAdvisorMove(int fromRow, int fromCol, int toRow, int toCol, Color color)  const{
+    // ç§»åŠ¨èŒƒå›´é™åˆ¶
+    if (toCol < 3 || toCol > 5) return false; // å£«åªèƒ½åœ¨ä¹å®«æ ¼å†…ç§»åŠ¨
+    if (color == RED && (toRow < 0 || toRow > 2)) return false; // çº¢æ–¹å£«åªèƒ½åœ¨ä¸‹æ–¹ä¹å®«æ ¼
+    if (color == BLACK && (toRow < 7 || toRow > 9)) return false; // é»‘æ–¹å£«åªèƒ½åœ¨ä¸Šæ–¹ä¹å®«æ ¼
+
+    // ç§»åŠ¨æ­¥é•¿é™åˆ¶ï¼ˆåªèƒ½æ–œèµ°ä¸€æ­¥ï¼‰
+    return abs(toCol - fromCol) == 1 && abs(toRow - fromRow) == 1;
+}
+
+// è±¡ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateElephantMove(int fromRow, int fromCol, int toRow, int toCol, Color color)  const{
+    // ç§»åŠ¨æ­¥é•¿é™åˆ¶ï¼ˆèµ°ç”°å­—ï¼‰
+    if (abs(toCol - fromCol) != 2 || abs(toRow - fromRow) != 2) return false;
+
+    // æ£€æŸ¥è±¡çœ¼æ˜¯å¦è¢«å µ
+    int blockRow = fromRow + (toRow - fromRow) / 2;
+    int blockCol = fromCol + (toCol - fromCol) / 2;
+    if (board[blockRow][blockCol]) return false;
+
+    // ä¸èƒ½è¿‡æ²³
+    if (color == RED && toRow > 4) return false; // çº¢æ–¹è±¡ä¸èƒ½è¿‡æ²³
+    if (color == BLACK && toRow < 5) return false; // é»‘æ–¹è±¡ä¸èƒ½è¿‡æ²³
+
+    return true;
+}
+
+// è½¦ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateRookMove(int fromRow, int fromCol, int toRow, int toCol)  const{
+    // è½¦åªèƒ½ç›´çº¿ç§»åŠ¨
+    if (fromRow != toRow && fromCol != toCol) return false;
+
+    // æ£€æŸ¥è·¯å¾„ä¸Šæ˜¯å¦æœ‰éšœç¢ç‰©
+    if (fromRow == toRow) { // æ°´å¹³ç§»åŠ¨
+        int step = (toCol > fromCol) ? 1 : -1;
+        for (int col = fromCol + step; col != toCol; col += step) {
+            if (board[fromRow][col]) return false;
+        }
+    } else { // å‚ç›´ç§»åŠ¨
+        int step = (toRow > fromRow) ? 1 : -1;
+        for (int row = fromRow + step; row != toRow; row += step) {
+            if (board[row][fromCol]) return false;
+        }
+    }
+
+    return true;
+}
+
+// ç‚®ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidateCannonMove(int fromRow, int fromCol, int toRow, int toCol)  const{
+    // ç‚®åªèƒ½ç›´çº¿ç§»åŠ¨
+    if (fromRow != toRow && fromCol != toCol) return false;
+
+    int obstacleCount = 0;
+
+    if (fromRow == toRow) { // æ°´å¹³ç§»åŠ¨
+        int step = (toCol > fromCol) ? 1 : -1;
+        for (int col = fromCol + step; col != toCol; col += step) {
+            if (board[fromRow][col]) obstacleCount++;
+        }
+    } else { // å‚ç›´ç§»åŠ¨
+        int step = (toRow > fromRow) ? 1 : -1;
+        for (int row = fromRow + step; row != toRow; row += step) {
+            if (board[row][fromCol]) obstacleCount++;
+        }
+    }
+
+    // ç‚®çš„è§„åˆ™ï¼šç§»åŠ¨æ—¶ä¸èƒ½æœ‰éšœç¢ç‰©ï¼Œåƒå­æ—¶å¿…é¡»æœ‰ä¸€ä¸ªéšœç¢ç‰©
+    ChessPiece* target = board[toRow][toCol];
+    if (target) { // åƒå­
+        return obstacleCount == 1;
+    } else { // ç§»åŠ¨
+        return obstacleCount == 0;
+    }
+}
+
+// å…µ/å’ç§»åŠ¨è§„åˆ™
+bool ChessBoard::ValidatePawnMove(int fromRow, int fromCol, int toRow, int toCol, Color color)  const{
+    int dx = toCol - fromCol;
+    int dy = toRow - fromRow;
+
+    if (color == RED) { // çº¢æ–¹å…µ
+        if (fromRow < 5) { // æœªè¿‡æ²³
+            if (dy != 1 || dx != 0) return false; // åªèƒ½å‘å‰èµ°ä¸€æ­¥
+        } else { // å·²è¿‡æ²³
+            if (!((dy == 1 && dx == 0) || (dy == 0 && abs(dx) == 1))) return false; // å¯ä»¥å‘å‰æˆ–å·¦å³èµ°ä¸€æ­¥
+        }
+    } else { // é»‘æ–¹å’
+        if (fromRow > 4) { // æœªè¿‡æ²³
+            if (dy != -1 || dx != 0) return false; // åªèƒ½å‘å‰èµ°ä¸€æ­¥
+        } else { // å·²è¿‡æ²³
+            if (!((dy == -1 && dx == 0) || (dy == 0 && abs(dx) == 1))) return false; // å¯ä»¥å‘å‰æˆ–å·¦å³èµ°ä¸€æ­¥
+        }
+    }
+
+    return true;
+}
+
+// åˆå§‹åŒ–æ£‹ç›˜æ ¼å­ç¬¦å·
 void ChessBoard::InitializeSymbols() {
     for (int row = 0; row < 10; ++row) {
         for (int col = 0; col < 9; ++col) {
-            // ºÓ½ç
+            // æ²³ç•Œ
             if (row == 4 || row == 5) {
-                positionSymbols[{row, col}] = '¡«'; // Ê¹ÓÃ²¨ÀËÏß±íÊ¾ºÓ½ç
+                positionSymbols[{row, col}] = "ï½"; // ä½¿ç”¨æ³¢æµªçº¿è¡¨ç¤ºæ²³ç•Œ
             }
-            // ¾Å¹¬¸ñ
+            // ä¹å®«æ ¼
             else if ((row >= 0 && row <= 2 && col >= 3 && col <= 5) || 
                      (row >= 7 && row <= 9 && col >= 3 && col <= 5)) {
-                positionSymbols[{row, col}] = '£«'; // Ê¹ÓÃ¼ÓºÅ±íÊ¾¾Å¹¬¸ñ
+                positionSymbols[{row, col}] = "ï¼‹"; // ä½¿ç”¨åŠ å·è¡¨ç¤ºä¹å®«æ ¼
             }
-            // ÆäËû¸ñ×Ó
+            // å…¶ä»–æ ¼å­
             else {
-                positionSymbols[{row, col}] = ' '; // ¿Õ¸ñ±íÊ¾ÆÕÍ¨¸ñ×Ó
+                positionSymbols[{row, col}] = " "; // ç©ºæ ¼è¡¨ç¤ºæ™®é€šæ ¼å­
             }
         }
     }
 }
 
 
-ChessGame::ChessGame() : currentPlayer(RED) {}
+ChessGame::ChessGame() : currentPlayer(RED) {
+    this->board = new ChessBoard();
+}
+
+ChessGame::ChessGame(ChessBoard *board){
+    this->currentPlayer = RED;
+    this->board = board;
+}
 
 void ChessGame::Start() {
     while (true) {
-        board.Print();
-        cout << (currentPlayer == RED ? "ºì·½" : "ºÚ·½") << "µÄ»ØºÏ" << endl;
+        board->Print();
+        cout << (currentPlayer == RED ? "çº¢æ–¹" : "é»‘æ–¹") << "çš„å›åˆ" << endl;
         
         string input;
-        cout << "ÊäÈëÒÆ¶¯£¨ÀıÈç a0 a1£©£º";
+        cout << "è¾“å…¥ç§»åŠ¨ï¼ˆä¾‹å¦‚ a0 a1ï¼‰ï¼š";
         getline(cin, input);
 
         auto positions = ParseInput(input);
         if (positions.size() != 2) {
-            cout << "ÎŞĞ§ÊäÈë£¡" << endl;
+            cout << "æ— æ•ˆè¾“å…¥ï¼" << endl;
             continue;
         }
 
-        if (board.MovePiece(positions[0].first, positions[0].second,
+        if (board->MovePiece(positions[0].first, positions[0].second,
                            positions[1].first, positions[1].second)) {
             currentPlayer = (currentPlayer == RED) ? BLACK : RED;
         } else {
-            cout << "·Ç·¨ÒÆ¶¯£¡" << endl;
+            cout << "éæ³•ç§»åŠ¨ï¼" << endl;
         }
     }
 }
 
 vector<pair<int, int>> ChessGame::ParseInput(const string& input) {
-    // ½«ÀàËÆ "a0 a1" µÄÊäÈë×ª»»Îª×ø±ê
-    vector<pair<int, int>> result;
-    // ... ½âÎöÂß¼­
-    return result;
+    vector<pair<int, int>> positions;
+
+    // æ£€æŸ¥è¾“å…¥æ ¼å¼
+    if (input.length() != 5 || input[2] != ' ') {
+        return positions; // è¿”å›ç©ºåˆ—è¡¨è¡¨ç¤ºè¾“å…¥æ— æ•ˆ
+    }
+
+    // è§£æèµ·å§‹ä½ç½®
+    char startColChar = input[0];
+    char startRowChar = input[1];
+    if (startColChar < 'a' || startColChar > 'i' || startRowChar < '0' || startRowChar > '9') {
+        return positions; // è¿”å›ç©ºåˆ—è¡¨è¡¨ç¤ºè¾“å…¥æ— æ•ˆ
+    }
+    int startCol = startColChar - 'a';
+    int startRow = startRowChar - '0';
+
+    // è§£æç›®æ ‡ä½ç½®
+    char endColChar = input[3];
+    char endRowChar = input[4];
+    if (endColChar < 'a' || endColChar > 'i' || endRowChar < '0' || endRowChar > '9') {
+        return positions; // è¿”å›ç©ºåˆ—è¡¨è¡¨ç¤ºè¾“å…¥æ— æ•ˆ
+    }
+    int endCol = endColChar - 'a';
+    int endRow = endRowChar - '0';
+
+    // è¿”å›è§£æåçš„åæ ‡
+    positions.push_back({startRow, startCol});
+    positions.push_back({endRow, endCol});
+    return positions;
 }

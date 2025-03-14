@@ -15,6 +15,7 @@ include_directories(include)
 set(SOURCES
     src/main.cpp
     src/piece.cpp
+    src/mcts.cpp
 )
 
 # 生成可执行文件
