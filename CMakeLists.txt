@@ -16,7 +16,12 @@ set(SOURCES
     src/main.cpp
     src/piece.cpp
     src/mcts.cpp
+    src/game.cpp
 )
+
+SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 # 生成可执行文件
 add_executable(ChineseChess ${SOURCES})

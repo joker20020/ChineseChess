@@ -1,22 +1,32 @@
 #include "piece.h"
 
+ChessBoard::ChessBoard(string name) {
+    // cout << "ChessBoard constructor called" << endl;
+    this->name = name;
+    InitializeBoard();
+    InitializeSymbols();
+}
+
 ChessBoard::ChessBoard() {
+    // cout << "ChessBoard constructor called" << endl;
+    this->name = "ChessBoard";
     InitializeBoard();
     InitializeSymbols();
 }
 
 ChessBoard::~ChessBoard() {
-    for (auto& row : board) {
-        for (auto piece : row) {
-            delete piece;
-        }
-    }
+    // cout << this->name << " ChessBoard destructor called" << endl;
+    // for (auto& row : board) {
+    //     for (auto piece : row) {
+    //         delete &piece;
+    //     }
+    // }
 }
 
 // 初始化棋盘格子
 void ChessBoard::InitializeBoard() {
     // 初始化棋盘为 10 行 x 9 列
-    board = vector<vector<ChessPiece*>>(10, vector<ChessPiece*>(9, nullptr));
+    board = vector<vector<ChessPiece>>(10, vector<ChessPiece>(9, ChessPiece{EMPTY, NONE, " "}));
 
     // 初始化红方棋子
     SetPiece(0, 0, ROOK, RED);       // 俥
@@ -57,11 +67,11 @@ void ChessBoard::InitializeBoard() {
 
 // 设置棋子
 void ChessBoard::SetPiece(int row, int col, PieceType type, Color color) {
-    board[row][col] = new ChessPiece{type, color, GetSymbol(type, color)};
+    board[row][col] = ChessPiece{type, color, GetSymbol(type, color)}; // 分配新对象
 }
 
-ChessPiece* ChessBoard::GetPiece(int row, int col) const{
-    return board[row][col];
+const ChessPiece* ChessBoard::GetPiece(int row, int col) const{
+    return &(board[row][col]);
 }
 
 // 获取棋子标识
@@ -94,9 +104,9 @@ void ChessBoard::Print() {
 
         // 打印棋盘内容
         for (int col = 0; col < 9; ++col) {
-            if (board[row][col]) {
+            if (board[row][col].type != EMPTY) {
                 // 打印棋子符号（固定宽度为 2 个字符）
-                cout << " " << board[row][col]->symbol << " ";
+                cout << " " << board[row][col].symbol << " ";
             } else {
                 // 打印棋盘格子符号（固定宽度为 2 个字符）
                 cout << " " << (positionSymbols[{row, col}] != " " ? positionSymbols[{row, col}] : "  ") << " ";
@@ -128,37 +138,40 @@ void ChessBoard::Print() {
 bool ChessBoard::MovePiece(int fromRow, int fromCol, int toRow, int toCol) {
     if (!IsValidMove(fromRow, fromCol, toRow, toCol)) return false;
     
-    ChessPiece* target = board[toRow][toCol];
-    if (target) delete target;
+    // ChessPiece* target = board[toRow][toCol];
+    // if (target) delete target;
     
     board[toRow][toCol] = board[fromRow][fromCol];
-    board[fromRow][fromCol] = nullptr;
+    board[fromRow][fromCol] = ChessPiece{EMPTY, NONE, " "};
     return true;
 }
 
 // 移动验证（核心逻辑）
 bool ChessBoard::IsValidMove(int fromRow, int fromCol, int toRow, int toCol) const{
-    ChessPiece* piece = board[fromRow][fromCol];
-    if (!piece) return false;
+    ChessPiece piece = board[fromRow][fromCol];
+    if (piece.type == EMPTY) return false;
+    if (fromRow == toRow && fromCol == toCol) return false;
+    if (board[toRow][toCol].color == piece.color) return false;
+    
 
     int dx = toCol - fromCol;
     int dy = toRow - fromRow;
 
-    switch (piece->type) {
+    switch (piece.type) {
         case KING:
-            return ValidateKingMove(fromRow, fromCol, toRow, toCol, piece->color);
+            return ValidateKingMove(fromRow, fromCol, toRow, toCol, piece.color);
         case HORSE:
             return ValidateHorseMove(fromRow, fromCol, dx, dy);
         case ADVISOR:
-            return ValidateAdvisorMove(fromRow, fromCol, toRow, toCol, piece->color);
+            return ValidateAdvisorMove(fromRow, fromCol, toRow, toCol, piece.color);
         case ELEPHANT:
-            return ValidateElephantMove(fromRow, fromCol, dx, dy, piece->color);
+            return ValidateElephantMove(fromRow, fromCol, toRow, toCol, piece.color);
         case ROOK:
-            return ValidateRookMove(fromRow, fromCol, dx, dy);
+            return ValidateRookMove(fromRow, fromCol, toRow, toCol);
         case CANNON:
-            return ValidateCannonMove(fromRow, fromCol, dx, dy);
+            return ValidateCannonMove(fromRow, fromCol, toRow, toCol);
         case PAWN:
-            return ValidatePawnMove(fromRow, fromCol, toRow, toCol, piece->color);
+            return ValidatePawnMove(fromRow, fromCol, toRow, toCol, piece.color);
         default:
             return false;
     }
@@ -184,7 +197,7 @@ bool ChessBoard::ValidateHorseMove(int fromRow, int fromCol, int dx, int dy)  co
     // 检查蹩马腿
     int blockRow = fromRow + dy/2;
     int blockCol = fromCol + dx/2;
-    return !board[blockRow][blockCol];
+    return board[blockRow][blockCol].type == EMPTY;
 }
 
 // 士移动规则
@@ -206,7 +219,7 @@ bool ChessBoard::ValidateElephantMove(int fromRow, int fromCol, int toRow, int t
     // 检查象眼是否被堵
     int blockRow = fromRow + (toRow - fromRow) / 2;
     int blockCol = fromCol + (toCol - fromCol) / 2;
-    if (board[blockRow][blockCol]) return false;
+    if (board[blockRow][blockCol].type != EMPTY) return false;
 
     // 不能过河
     if (color == RED && toRow > 4) return false; // 红方象不能过河
@@ -224,12 +237,12 @@ bool ChessBoard::ValidateRookMove(int fromRow, int fromCol, int toRow, int toCol
     if (fromRow == toRow) { // 水平移动
         int step = (toCol > fromCol) ? 1 : -1;
         for (int col = fromCol + step; col != toCol; col += step) {
-            if (board[fromRow][col]) return false;
+            if (board[fromRow][col].type != EMPTY) return false;
         }
     } else { // 垂直移动
         int step = (toRow > fromRow) ? 1 : -1;
         for (int row = fromRow + step; row != toRow; row += step) {
-            if (board[row][fromCol]) return false;
+            if (board[row][fromCol].type != EMPTY) return false;
         }
     }
 
@@ -246,18 +259,18 @@ bool ChessBoard::ValidateCannonMove(int fromRow, int fromCol, int toRow, int toC
     if (fromRow == toRow) { // 水平移动
         int step = (toCol > fromCol) ? 1 : -1;
         for (int col = fromCol + step; col != toCol; col += step) {
-            if (board[fromRow][col]) obstacleCount++;
+            if (board[fromRow][col].type != EMPTY) obstacleCount++;
         }
     } else { // 垂直移动
         int step = (toRow > fromRow) ? 1 : -1;
         for (int row = fromRow + step; row != toRow; row += step) {
-            if (board[row][fromCol]) obstacleCount++;
+            if (board[row][fromCol].type != EMPTY) obstacleCount++;
         }
     }
 
     // 炮的规则：移动时不能有障碍物，吃子时必须有一个障碍物
-    ChessPiece* target = board[toRow][toCol];
-    if (target) { // 吃子
+    ChessPiece target = board[toRow][toCol];
+    if (target.type != EMPTY) { // 吃子
         return obstacleCount == 1;
     } else { // 移动
         return obstacleCount == 0;
@@ -305,70 +318,4 @@ void ChessBoard::InitializeSymbols() {
             }
         }
     }
-}
-
-
-ChessGame::ChessGame() : currentPlayer(RED) {
-    this->board = new ChessBoard();
-}
-
-ChessGame::ChessGame(ChessBoard *board){
-    this->currentPlayer = RED;
-    this->board = board;
-}
-
-void ChessGame::Start() {
-    while (true) {
-        board->Print();
-        cout << (currentPlayer == RED ? "红方" : "黑方") << "的回合" << endl;
-        
-        string input;
-        cout << "输入移动（例如 a0 a1）：";
-        getline(cin, input);
-
-        auto positions = ParseInput(input);
-        if (positions.size() != 2) {
-            cout << "无效输入！" << endl;
-            continue;
-        }
-
-        if (board->MovePiece(positions[0].first, positions[0].second,
-                           positions[1].first, positions[1].second)) {
-            currentPlayer = (currentPlayer == RED) ? BLACK : RED;
-        } else {
-            cout << "非法移动！" << endl;
-        }
-    }
-}
-
-vector<pair<int, int>> ChessGame::ParseInput(const string& input) {
-    vector<pair<int, int>> positions;
-
-    // 检查输入格式
-    if (input.length() != 5 || input[2] != ' ') {
-        return positions; // 返回空列表表示输入无效
-    }
-
-    // 解析起始位置
-    char startColChar = input[0];
-    char startRowChar = input[1];
-    if (startColChar < 'a' || startColChar > 'i' || startRowChar < '0' || startRowChar > '9') {
-        return positions; // 返回空列表表示输入无效
-    }
-    int startCol = startColChar - 'a';
-    int startRow = startRowChar - '0';
-
-    // 解析目标位置
-    char endColChar = input[3];
-    char endRowChar = input[4];
-    if (endColChar < 'a' || endColChar > 'i' || endRowChar < '0' || endRowChar > '9') {
-        return positions; // 返回空列表表示输入无效
-    }
-    int endCol = endColChar - 'a';
-    int endRow = endRowChar - '0';
-
-    // 返回解析后的坐标
-    positions.push_back({startRow, startCol});
-    positions.push_back({endRow, endCol});
-    return positions;
 }

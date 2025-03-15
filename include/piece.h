@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <string>
@@ -8,17 +9,19 @@ using namespace std;
 
 // 棋子类型枚举
 enum PieceType {
+    EMPTY,        // 空
     KING,        // 将/帅
     ADVISOR,     // 士/仕
     ELEPHANT,    // 象/相
     HORSE,       // 马/馬
     ROOK,        // 车/車
     CANNON,      // 炮/砲
-    PAWN         // 卒/兵
+    PAWN,        // 卒/兵
 };
 
 // 棋子颜色枚举
 enum Color {
+    NONE,
     RED,
     BLACK
 };
@@ -33,15 +36,17 @@ struct ChessPiece {
 // 棋盘类
 class ChessBoard {
 private:
-    vector<vector<ChessPiece*>> board;
+    vector<vector<ChessPiece>> board;
     map<pair<int, int>, string> positionSymbols;
 
 public:
+    string name;
     ChessBoard();
+    ChessBoard(string name);
     ~ChessBoard();
     void InitializeBoard();
     void SetPiece(int row, int col, PieceType type, Color color);
-    ChessPiece* GetPiece(int row, int col) const;
+    const ChessPiece* GetPiece(int row, int col) const;
     string GetSymbol(PieceType type, Color color);
     void Print();
     bool MovePiece(int fromRow, int fromCol, int toRow, int toCol);
@@ -70,22 +75,4 @@ private:
     // 兵/卒移动规则
     bool ValidatePawnMove(int fromRow, int fromCol, int toRow, int toCol, Color color) const;
 };
-
-// 游戏管理类
-class ChessGame {
-private:
-    
-    Color currentPlayer;
-
-public:
-    ChessBoard *board;
-    ChessGame();
-    ChessGame(ChessBoard *board);
-
-    void Start();
-
-private:
-    vector<pair<int, int>> ParseInput(const string& input);
-};
-
 

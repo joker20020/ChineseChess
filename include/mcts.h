@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <map>
@@ -9,7 +10,12 @@
 
 using namespace std;
 
-// 棋盘和棋子定义（省略，参考之前的代码）
+enum GameResult {
+    RED_WIN,    // 红方获胜
+    BLACK_WIN,  // 黑方获胜
+    DRAW,       // 平局
+    NOT_OVER    // 游戏未结束
+};
 
 // MCTS 节点定义
 class MCTSNode {
@@ -22,7 +28,7 @@ public:
     double totalScore; // 总得分
     pair<pair<int, int>, pair<int, int>> lastMove; // 记录最后移动
 
-    MCTSNode(ChessBoard board, Color currentPlayer, MCTSNode* parent = nullptr);
+    MCTSNode(const ChessBoard& board, Color currentPlayer, MCTSNode* parent = nullptr);
 
     ~MCTSNode();
 
@@ -50,14 +56,19 @@ public:
     // 获取最后移动
     pair<pair<int, int>, pair<int, int>> GetLastMove() const;
 
+    // 判断游戏是否结束
+    static GameResult IsGameOver(const ChessBoard& board, Color currentPlayer);
+
+    // 评估棋盘状态
+    static double EvaluateBoard(GameResult result, Color player);
+
+    // 打印节点对应棋盘
+    void Print();
+
 private:
     // 生成合法移动
     vector<pair<pair<int, int>, pair<int, int>>> GenerateLegalMoves(const ChessBoard& board, Color player);
-
-    // 判断游戏是否结束
-    bool IsGameOver(const ChessBoard& board);
-    // 评估棋盘状态
-    double EvaluateBoard(const ChessBoard& board, Color player);
+    
 };
 
 // MCTS AI
@@ -65,61 +76,26 @@ class MCTSAI {
 public:
     MCTSNode* root;
 
-    MCTSAI(const ChessBoard board, Color player) {
-        root = new MCTSNode(board, player);
-    }
+    MCTSAI();
+    MCTSAI(const ChessBoard board, Color player);
 
-    ~MCTSAI() {
-        delete root;
-    }
-
+    ~MCTSAI();
     // 运行 MCTS
-    void Run(int iterations) {
-        for (int i = 0; i < iterations; ++i) {
-            MCTSNode* node = Select(root);
-            if (!node->IsLeaf()) {
-                node = node->SelectBestChild();
-            }
-            if (!IsGameOver(node->board)) {
-                node->Expand();
-                node = node->children[0];
-            }
-            double score = node->Simulate();
-            node->Backpropagate(score);
-        }
-    }
+    void Run(int iterations);
 
     // 选择最佳移动
-    pair<pair<int, int>, pair<int, int>> GetBestMove() {
-        MCTSNode* bestChild = *max_element(root->children.begin(), root->children.end(), [](MCTSNode* a, MCTSNode* b) {
-            return a->visitCount < b->visitCount;
-        });
-        return bestChild->GetLastMove();
-    }
+    pair<pair<int, int>, pair<int, int>> GetBestMove();
+
+    // 自动更新节点
+    void AutoUpdate();
+
+    // 手动更新节点
+    void Update(pair<pair<int, int>, pair<int, int>> move);
 
 private:
     // 选择节点
-    MCTSNode* Select(MCTSNode* node) {
-        while (!node->IsLeaf()) {
-            node = node->SelectBestChild();
-        }
-        return node;
-    }
+    MCTSNode* Select(MCTSNode* node);
 
-    // 判断游戏是否结束
-    bool IsGameOver(const ChessBoard& board) {
-        // 检查是否有一方的将/帅被吃掉
-        bool redKingAlive = false, blackKingAlive = false;
-        for (int row = 0; row < 10; ++row) {
-            for (int col = 0; col < 9; ++col) {
-                if (board.GetPiece(row, col) && board.GetPiece(row, col)->type == KING) {
-                    if (board.GetPiece(row, col)->color == RED) redKingAlive = true;
-                    else blackKingAlive = true;
-                }
-            }
-        }
-        return !redKingAlive || !blackKingAlive;
-    }
 };
 
 // 主函数
