@@ -367,3 +367,108 @@ void ChessBoard::InitializeSymbols() {
         }
     }
 }
+
+GameResult ChessBoard::IsGameOver(const ChessBoard& board, Color currentPlayer) {
+    bool redKingAlive = false, blackKingAlive = false;
+    pair<int, int> redKingPos, blackKingPos;
+
+    // 检查将/帅是否存活，并记录位置
+    for (int row = 0; row < 10; ++row) {
+        for (int col = 0; col < 9; ++col) {
+            const ChessPiece* piece = board.GetPiece(row, col);
+            if (piece && piece->type == KING) {
+                if (piece->color == RED) {
+                    redKingAlive = true;
+                    redKingPos = {row, col};
+                } else {
+                    blackKingAlive = true;
+                    blackKingPos = {row, col};
+                }
+            }
+        }
+    }
+
+    // 判断将/帅是否存活
+    if (!redKingAlive && !blackKingAlive) {
+        return DRAW; // 双方将/帅都被吃掉，平局
+    } else if (!redKingAlive) {
+        return BLACK_WIN; // 红方将/帅被吃掉，黑方获胜
+    } else if (!blackKingAlive) {
+        return RED_WIN; // 黑方将/帅被吃掉，红方获胜
+    }
+
+    // 检查将/帅是否相对且中间无棋子
+    if (redKingPos.second == blackKingPos.second) { // 在同一列
+        bool hasObstacle = false;
+        int startRow = min(redKingPos.first, blackKingPos.first) + 1;
+        int endRow = max(redKingPos.first, blackKingPos.first);
+        for (int row = startRow; row < endRow; ++row) {
+            if (board.GetPiece(row, redKingPos.second)) {
+                hasObstacle = true;
+                break;
+            }
+        }
+        if (!hasObstacle) {
+            // 将/帅相对且中间无棋子，违规方判负
+            return (currentPlayer == BLACK) ? BLACK_WIN : RED_WIN;
+        }
+    }
+
+    // 检查双方是否只剩下将/帅
+    bool redHasOtherPieces = false, blackHasOtherPieces = false;
+    for (int row = 0; row < 10; ++row) {
+        for (int col = 0; col < 9; ++col) {
+            const ChessPiece* piece = board.GetPiece(row, col);
+            if (piece && piece->type != KING) {
+                if (piece->color == RED) redHasOtherPieces = true;
+                else blackHasOtherPieces = true;
+            }
+        }
+    }
+
+    if (!redHasOtherPieces && !blackHasOtherPieces) {
+        return DRAW; // 双方都只剩下将/帅，无法将死对方，平局
+    }
+
+    // // 检查双方是否有合法移动
+    // bool redHasMoves = false, blackHasMoves = false;
+    // for (int row = 0; row < 10; ++row) {
+    //     for (int col = 0; col < 9; ++col) {
+    //         const ChessPiece* piece = board.GetPiece(row, col);
+    //         if (piece) {
+    //             if (piece->color == RED) {
+    //                 for (int targetRow = 0; targetRow < 10; ++targetRow) {
+    //                     for (int targetCol = 0; targetCol < 9; ++targetCol) {
+    //                         if (board.IsValidMove(row, col, targetRow, targetCol)) {
+    //                             redHasMoves = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                     if (redHasMoves) break;
+    //                 }
+    //             } else {
+    //                 for (int targetRow = 0; targetRow < 10; ++targetRow) {
+    //                     for (int targetCol = 0; targetCol < 9; ++targetCol) {
+    //                         if (board.IsValidMove(row, col, targetRow, targetCol)) {
+    //                             blackHasMoves = true;
+    //                             break;
+    //                         }
+    //                     }
+    //                     if (blackHasMoves) break;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+    // // 判断是否无棋可走
+    // if (!redHasMoves && !blackHasMoves) {
+    //     return DRAW; // 双方都无棋可走，平局
+    // } else if (!redHasMoves) {
+    //     return BLACK_WIN; // 红方无棋可走，黑方获胜
+    // } else if (!blackHasMoves) {
+    //     return RED_WIN; // 黑方无棋可走，红方获胜
+    // }
+
+    return NOT_OVER; // 游戏未结束
+}

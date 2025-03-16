@@ -12,6 +12,7 @@ ChessGame::ChessGame(ChessBoard *board, MCTSAI& ai){
 }
 
 void ChessGame::Start() {
+    time_t startTime, endTime;
     while (true) {
         board->Print(true);
         cout << (currentPlayer == RED ? "红方" : "黑方") << "的回合" << endl;
@@ -19,7 +20,12 @@ void ChessGame::Start() {
         {
             srand(time(nullptr));
 
-            ai.Run(2000); // 运行 1000 次模拟
+            time(&startTime);
+            // ai.Run(2000); // 运行 1000 次模拟
+            ai.ParallelRun(4000, 10);
+            time(&endTime);
+
+            cout << "AI 运行时间：" << difftime(endTime, startTime) << "秒" << endl;
 
             auto bestMove = ai.GetBestMove();
             cout << "最佳移动: (" << bestMove.first.first << ", " << bestMove.first.second << ") -> ("

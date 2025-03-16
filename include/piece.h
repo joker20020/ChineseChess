@@ -36,6 +36,13 @@ struct ChessPiece {
     string symbol; // Unicode符号
 };
 
+enum GameResult {
+    RED_WIN,    // 红方获胜
+    BLACK_WIN,  // 黑方获胜
+    DRAW,       // 平局
+    NOT_OVER    // 游戏未结束
+};
+
 // 棋盘类
 class ChessBoard {
 private:
@@ -51,10 +58,12 @@ public:
     void SetPiece(int row, int col, PieceType type, Color color);
     const ChessPiece* GetPiece(int row, int col) const;
     string GetSymbol(PieceType type, Color color);
-    void Print(bool reverse = false);
+    void Print(bool reverse =false);
     bool MovePiece(int fromRow, int fromCol, int toRow, int toCol);
     bool IsValidMove(int fromRow, int fromCol, int toRow, int toCol) const;
     void InitializeSymbols();
+    static GameResult IsGameOver(const ChessBoard& board, Color currentPlayer);
+
 
 private:
     // 将/帅移动规则

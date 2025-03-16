@@ -5,8 +5,9 @@ MCTSNode::MCTSNode(const ChessBoard& board, Color currentPlayer, MCTSNode* paren
     this->board.name = "in chessboard";
     this->currentPlayer = currentPlayer;
     this->parent = parent;
-    this->visitCount = 0;
-    this->totalScore = 0;
+    this->visitCount.store(0);
+    this->totalScore.store(0);
+    this->virtualLoss.store(0);
 }
 
 MCTSNode::~MCTSNode() {
@@ -26,20 +27,25 @@ bool MCTSNode::IsRoot() const {
 }
 
 // 计算 UCB1 值
-double MCTSNode::UCB1(double explorationWeight) const {
+double MCTSNode::UCB1(double explorationWeight) const{
     if (visitCount == 0) return numeric_limits<double>::max();
-    return (totalScore / visitCount) + explorationWeight * sqrt(log(parent->visitCount) / visitCount);
+    return (totalScore.load() / visitCount.load()) + explorationWeight * sqrt(log(parent->visitCount.load()) / visitCount.load()) + virtualLoss.load();
 }
 
 // 选择最佳子节点
 MCTSNode* MCTSNode::SelectBestChild() {
-    return *max_element(children.begin(), children.end(), [](MCTSNode* a, MCTSNode* b) {
+    lock_guard<mutex> lock(mtx);
+    MCTSNode* bestChild = *max_element(children.begin(), children.end(), [](MCTSNode* a, MCTSNode* b) {
         return a->UCB1() < b->UCB1();
     });
+    bestChild->virtualLoss.store(bestChild->virtualLoss.load() - 1);
+    return bestChild;
 }
 
 // 扩展子节点
 void MCTSNode::Expand() {
+    lock_guard<mutex> lock(mtx);
+    if (!IsLeaf()) return;
     vector<pair<pair<int, int>, pair<int, int>>> moves = GenerateLegalMoves(board, currentPlayer);
     for (const auto& move : moves) {
         ChessBoard newBoard = board;
@@ -79,7 +85,8 @@ double MCTSNode::Simulate() {
 // 回溯更新节点
 void MCTSNode::Backpropagate(double score) {
     visitCount++;
-    totalScore += score;
+    totalScore.store(totalScore + score);
+    virtualLoss.store(virtualLoss + 1);
     if (!IsRoot()) parent->Backpropagate(-score);
 }
 
@@ -104,108 +111,7 @@ vector<pair<pair<int, int>, pair<int, int>>> MCTSNode::GenerateLegalMoves(const 
 
 // 判断游戏是否结束
 GameResult MCTSNode::IsGameOver(const ChessBoard& board, Color currentPlayer) {
-    bool redKingAlive = false, blackKingAlive = false;
-    pair<int, int> redKingPos, blackKingPos;
-
-    // 检查将/帅是否存活，并记录位置
-    for (int row = 0; row < 10; ++row) {
-        for (int col = 0; col < 9; ++col) {
-            const ChessPiece* piece = board.GetPiece(row, col);
-            if (piece && piece->type == KING) {
-                if (piece->color == RED) {
-                    redKingAlive = true;
-                    redKingPos = {row, col};
-                } else {
-                    blackKingAlive = true;
-                    blackKingPos = {row, col};
-                }
-            }
-        }
-    }
-
-    // 判断将/帅是否存活
-    if (!redKingAlive && !blackKingAlive) {
-        return DRAW; // 双方将/帅都被吃掉，平局
-    } else if (!redKingAlive) {
-        return BLACK_WIN; // 红方将/帅被吃掉，黑方获胜
-    } else if (!blackKingAlive) {
-        return RED_WIN; // 黑方将/帅被吃掉，红方获胜
-    }
-
-    // 检查将/帅是否相对且中间无棋子
-    if (redKingPos.second == blackKingPos.second) { // 在同一列
-        bool hasObstacle = false;
-        int startRow = min(redKingPos.first, blackKingPos.first) + 1;
-        int endRow = max(redKingPos.first, blackKingPos.first);
-        for (int row = startRow; row < endRow; ++row) {
-            if (board.GetPiece(row, redKingPos.second)) {
-                hasObstacle = true;
-                break;
-            }
-        }
-        if (!hasObstacle) {
-            // 将/帅相对且中间无棋子，违规方判负
-            return (currentPlayer == BLACK) ? BLACK_WIN : RED_WIN;
-        }
-    }
-
-    // 检查双方是否只剩下将/帅
-    bool redHasOtherPieces = false, blackHasOtherPieces = false;
-    for (int row = 0; row < 10; ++row) {
-        for (int col = 0; col < 9; ++col) {
-            const ChessPiece* piece = board.GetPiece(row, col);
-            if (piece && piece->type != KING) {
-                if (piece->color == RED) redHasOtherPieces = true;
-                else blackHasOtherPieces = true;
-            }
-        }
-    }
-
-    if (!redHasOtherPieces && !blackHasOtherPieces) {
-        return DRAW; // 双方都只剩下将/帅，无法将死对方，平局
-    }
-
-    // // 检查双方是否有合法移动
-    // bool redHasMoves = false, blackHasMoves = false;
-    // for (int row = 0; row < 10; ++row) {
-    //     for (int col = 0; col < 9; ++col) {
-    //         const ChessPiece* piece = board.GetPiece(row, col);
-    //         if (piece) {
-    //             if (piece->color == RED) {
-    //                 for (int targetRow = 0; targetRow < 10; ++targetRow) {
-    //                     for (int targetCol = 0; targetCol < 9; ++targetCol) {
-    //                         if (board.IsValidMove(row, col, targetRow, targetCol)) {
-    //                             redHasMoves = true;
-    //                             break;
-    //                         }
-    //                     }
-    //                     if (redHasMoves) break;
-    //                 }
-    //             } else {
-    //                 for (int targetRow = 0; targetRow < 10; ++targetRow) {
-    //                     for (int targetCol = 0; targetCol < 9; ++targetCol) {
-    //                         if (board.IsValidMove(row, col, targetRow, targetCol)) {
-    //                             blackHasMoves = true;
-    //                             break;
-    //                         }
-    //                     }
-    //                     if (blackHasMoves) break;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // // 判断是否无棋可走
-    // if (!redHasMoves && !blackHasMoves) {
-    //     return DRAW; // 双方都无棋可走，平局
-    // } else if (!redHasMoves) {
-    //     return BLACK_WIN; // 红方无棋可走，黑方获胜
-    // } else if (!blackHasMoves) {
-    //     return RED_WIN; // 黑方无棋可走，红方获胜
-    // }
-
-    return NOT_OVER; // 游戏未结束
+    return board.IsGameOver(board, currentPlayer);
 }
 
 // 评估棋盘状态
@@ -235,6 +141,13 @@ MCTSAI::MCTSAI(const ChessBoard board, Color player) {
     root = new MCTSNode(board, player);
 }
 
+MCTSAI::MCTSAI(const MCTSAI &other) {
+    root = other.root;
+}
+MCTSAI& MCTSAI::operator=(const MCTSAI& other){
+    root = other.root;
+    return *this;
+}
 MCTSAI::~MCTSAI() {
     delete root;
 }
@@ -242,18 +155,34 @@ MCTSAI::~MCTSAI() {
 // 运行 MCTS
 void MCTSAI::Run(int iterations) {
     for (int i = 0; i < iterations; ++i) {
-        cout << "Iteration: " << i + 1 << "/"  << iterations << '\r';
+        // cout << "Iteration: " << i + 1 << "/"  << iterations << '\r';
         MCTSNode* node = Select(root);
         if (!node->IsLeaf()) {
             node = node->SelectBestChild();
         }
-        if (node->IsGameOver(node->board, node->currentPlayer) == NOT_OVER) {
+        if (node->IsGameOver(node->board, node->currentPlayer) == NOT_OVER && node->IsLeaf()) {
             node->Expand();
             node = node->children[rand() % node->children.size()];
         }
         double score = node->Simulate();
         node->Backpropagate(score);
     }
+}
+
+// 多线程运行 MCTS
+void MCTSAI::ParallelRun(int iterations, int threadNum) {
+    vector<thread> threads;
+    int threadIterations = iterations / threadNum;
+    for (int i = 0; i < threadNum; i++)
+    {
+        threads.push_back(
+            thread(&MCTSAI::Run, this, threadIterations)
+        );
+    }
+    for(auto &thread : threads){
+        thread.join();
+    }
+    
 }
 
 // 选择最佳移动

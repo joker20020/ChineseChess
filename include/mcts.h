@@ -6,16 +6,13 @@
 #include <ctime>
 #include <cstdlib>
 #include <algorithm>
+#include <mutex>
+#include <atomic>
+#include <thread>
 #include "piece.h"
 
 using namespace std;
 
-enum GameResult {
-    RED_WIN,    // 红方获胜
-    BLACK_WIN,  // 黑方获胜
-    DRAW,       // 平局
-    NOT_OVER    // 游戏未结束
-};
 
 // MCTS 节点定义
 class MCTSNode {
@@ -24,8 +21,10 @@ public:
     Color currentPlayer; // 当前玩家
     MCTSNode* parent; // 父节点
     vector<MCTSNode*> children; // 子节点
-    int visitCount; // 访问次数
-    double totalScore; // 总得分
+    atomic<int> visitCount; // 访问次数
+    atomic<double> totalScore; // 总得分
+    atomic<double> virtualLoss; //虚拟损失
+    mutex mtx;
     pair<pair<int, int>, pair<int, int>> lastMove; // 记录最后移动
 
     MCTSNode(const ChessBoard& board, Color currentPlayer, MCTSNode* parent = nullptr);
@@ -78,10 +77,14 @@ public:
 
     MCTSAI();
     MCTSAI(const ChessBoard board, Color player);
+    MCTSAI(const MCTSAI& other);
+    MCTSAI& operator=(const MCTSAI& other);
 
     ~MCTSAI();
     // 运行 MCTS
     void Run(int iterations);
+    void ParallelRun(int iterations, int threadNum = 10);
+
 
     // 选择最佳移动
     pair<pair<int, int>, pair<int, int>> GetBestMove();
@@ -93,6 +96,7 @@ public:
     void Update(pair<pair<int, int>, pair<int, int>> move);
 
 private:
+
     // 选择节点
     MCTSNode* Select(MCTSNode* node);
 
