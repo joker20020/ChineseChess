@@ -5,6 +5,9 @@
 #include <map>
 #include <algorithm>
 
+#define BOARD_WIDTH 9
+#define BOARD_HEIGHT 10
+
 using namespace std;
 
 // 棋子类型枚举
@@ -48,7 +51,7 @@ public:
     void SetPiece(int row, int col, PieceType type, Color color);
     const ChessPiece* GetPiece(int row, int col) const;
     string GetSymbol(PieceType type, Color color);
-    void Print();
+    void Print(bool reverse = false);
     bool MovePiece(int fromRow, int fromCol, int toRow, int toCol);
     bool IsValidMove(int fromRow, int fromCol, int toRow, int toCol) const;
     void InitializeSymbols();

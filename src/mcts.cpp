@@ -242,7 +242,7 @@ MCTSAI::~MCTSAI() {
 // 运行 MCTS
 void MCTSAI::Run(int iterations) {
     for (int i = 0; i < iterations; ++i) {
-        cout << "Iteration " << i + 1 << endl;
+        cout << "Iteration: " << i + 1 << "/"  << iterations << '\r';
         MCTSNode* node = Select(root);
         if (!node->IsLeaf()) {
             node = node->SelectBestChild();

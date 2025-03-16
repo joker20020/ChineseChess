@@ -89,49 +89,97 @@ string ChessBoard::GetSymbol(PieceType type, Color color) {
 }
 
 // 打印棋盘
-void ChessBoard::Print() {
-    // 打印列标签
-    cout << "  ";
-    for (int col = 0; col < 9; ++col) {
-        cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（a-i）
-    }
-    cout << endl;
+void ChessBoard::Print(bool reverse) {
+    
 
     // 打印棋盘
-    for (int row = 0; row < 10; ++row) {
-        // 打印行标签
-        cout << row << " "; // 行标签（0-9）
-
-        // 打印棋盘内容
-        for (int col = 0; col < 9; ++col) {
-            if (board[row][col].type != EMPTY) {
-                // 打印棋子符号（固定宽度为 2 个字符）
-                cout << " " << board[row][col].symbol << " ";
-            } else {
-                // 打印棋盘格子符号（固定宽度为 2 个字符）
-                cout << " " << (positionSymbols[{row, col}] != " " ? positionSymbols[{row, col}] : "  ") << " ";
-            }
-            if (col < 8) cout << "|"; // 列分隔符
+    if (reverse)
+    {
+        // 打印列标签
+        cout << "  ";
+        for (int col = BOARD_WIDTH - 1; col >= 0; --col) {
+            cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（i-a）
         }
-        cout << " " << row << endl; // 行标签（0-9）
-
-        // 打印行分隔线
-        if (row < 9) {
-            cout << "  ";
-            for (int col = 0; col < 9; ++col) {
-                cout << "----";
-                if (col < 8) cout << "+";
+        cout << endl;
+        for (int row = BOARD_HEIGHT - 1; row >= 0; --row) {
+            // 打印行标签
+            cout << row << " "; // 行标签（0-9）
+    
+            // 打印棋盘内容
+            for (int col = BOARD_WIDTH - 1; col >= 0; --col) {
+                if (board[row][col].type != EMPTY) {
+                    // 打印棋子符号（固定宽度为 2 个字符）
+                    cout << " " << board[row][col].symbol << " ";
+                } else {
+                    // 打印棋盘格子符号（固定宽度为 2 个字符）
+                    cout << " " << (positionSymbols[{row, col}] != " " ? positionSymbols[{row, col}] : "  ") << " ";
+                }
+                if (col > 0) cout << "|"; // 列分隔符
             }
-            cout << endl;
+            cout << " " << row << endl; // 行标签（0-9）
+    
+            // 打印行分隔线
+            if (row >= 0) {
+                cout << "  ";
+                for (int col = 0; col < BOARD_WIDTH; ++col) {
+                    cout << "----";
+                    if (col < 8) cout << "+";
+                }
+                cout << endl;
+            }
+        }
+
+        // 打印列标签
+        cout << "  ";
+        for (int col = BOARD_WIDTH - 1; col >= 0; --col) {
+            cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（i-a）
         }
     }
+    else{
+        // 打印列标签
+        cout << "  ";
+        for (int col = 0; col < BOARD_WIDTH; ++col) {
+            cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（a-i）
+        }
+        cout << endl;
 
-    // 打印列标签
-    cout << "  ";
-    for (int col = 0; col < 9; ++col) {
-        cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（a-i）
-    }
+        for (int row = 0; row < BOARD_HEIGHT; ++row) {
+            // 打印行标签
+            cout << row << " "; // 行标签（0-9）
+    
+            // 打印棋盘内容
+            for (int col = 0; col < BOARD_WIDTH; ++col) {
+                if (board[row][col].type != EMPTY) {
+                    // 打印棋子符号（固定宽度为 2 个字符）
+                    cout << " " << board[row][col].symbol << " ";
+                } else {
+                    // 打印棋盘格子符号（固定宽度为 2 个字符）
+                    cout << " " << (positionSymbols[{row, col}] != " " ? positionSymbols[{row, col}] : "  ") << " ";
+                }
+                if (col < 8) cout << "|"; // 列分隔符
+            }
+            cout << " " << row << endl; // 行标签（0-9）
+    
+            // 打印行分隔线
+            if (row < BOARD_HEIGHT) {
+                cout << "  ";
+                for (int col = 0; col < BOARD_WIDTH; ++col) {
+                    cout << "----";
+                    if (col < 8) cout << "+";
+                }
+                cout << endl;
+            }
+        }
+
+        // 打印列标签
+        cout << "  ";
+        for (int col = 0; col < BOARD_WIDTH; ++col) {
+            cout << " " << static_cast<char>('a' + col) << "   "; // 列标签（a-i）
+        }
+        cout << endl;
+    }  
     cout << endl;
+    
 }
 
 // 移动棋子

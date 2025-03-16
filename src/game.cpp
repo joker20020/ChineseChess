@@ -13,13 +13,13 @@ ChessGame::ChessGame(ChessBoard *board, MCTSAI& ai){
 
 void ChessGame::Start() {
     while (true) {
-        board->Print();
+        board->Print(true);
         cout << (currentPlayer == RED ? "红方" : "黑方") << "的回合" << endl;
         if (currentPlayer == aiColor)
         {
             srand(time(nullptr));
 
-            ai.Run(1000); // 运行 1000 次模拟
+            ai.Run(2000); // 运行 1000 次模拟
 
             auto bestMove = ai.GetBestMove();
             cout << "最佳移动: (" << bestMove.first.first << ", " << bestMove.first.second << ") -> ("
